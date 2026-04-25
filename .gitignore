@@ -33,3 +33,10 @@ test_venv/
 htmlcov/
 .coverage
 .pytest_cache/
+backend/maptoposter.db
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+.env
+node_modules/
+.next/
