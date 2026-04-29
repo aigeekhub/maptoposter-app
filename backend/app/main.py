@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import Base, engine
 from app.models import Folder, SavedMap, User  # noqa: F401
-from app.routes import auth, me, themes
+from app.routes import auth, maps, me, themes
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(me.router, prefix=settings.api_prefix)
+app.include_router(maps.router, prefix=settings.api_prefix)
 app.include_router(themes.router, prefix=settings.api_prefix)
 
 
