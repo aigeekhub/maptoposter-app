@@ -1,0 +1,621 @@
+{
+  "architecture": [
+    {
+      "name": "Antigravity Custom Skills",
+      "path": "skills",
+      "type": "Skill Layer"
+    }
+  ],
+  "timeline": [
+    {
+      "hash": "1993da40c34e61b6f12b99ffc23335f403b93d39",
+      "author": "Ankur Gupta",
+      "date": "2026-01-08",
+      "message": "Initial commit",
+      "category": "Development Update",
+      "files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "hash": "9652ba6dbaec30402404fb5eb7506c99163cfcbc",
+      "author": "originalankur",
+      "date": "2026-01-08",
+      "message": "Version 0.1 - Add maptoposter source, data, and readme",
+      "category": "Documentation",
+      "files": [
+        ".gitignore",
+        "README.md",
+        "create_map_poster.py",
+        "fonts/Roboto-Bold.ttf",
+        "fonts/Roboto-Light.ttf",
+        "fonts/Roboto-Regular.ttf",
+        "posters/barcelona_warm_beige_20260108_172924.png",
+        "posters/chicago_noir_20260108_173313.png",
+        "posters/dubai_midnight_blue_20260108_174920.png",
+        "posters/mumbai_contrast_zones_20260108_170325.png",
+        "posters/mumbai_contrast_zones_20260108_172010.png",
+        "posters/new_york_noir_20260108_164217.png",
+        "posters/new_york_noir_20260108_172453.png",
+        "posters/tokyo_japanese_ink_20260108_165830.png",
+        "posters/venice_blueprint_20260108_165527.png",
+        "requirements.txt",
+        "themes/autumn.json",
+        "themes/blueprint.json",
+        "themes/contrast_zones.json",
+        "themes/copper_patina.json",
+        "themes/feature_based.json",
+        "themes/forest.json",
+        "themes/gradient_roads.json",
+        "themes/japanese_ink.json",
+        "themes/midnight_blue.json",
+        "themes/monochrome_blue.json",
+        "themes/neon_cyberpunk.json",
+        "themes/noir.json",
+        "themes/ocean.json",
+        "themes/pastel_dream.json",
+        "themes/sunset.json",
+        "themes/terracotta.json",
+        "themes/warm_beige.json"
+      ]
+    },
+    {
+      "hash": "54a139c513a3e4b5aa9d79d0a2e629dfed06d711",
+      "author": "originalankur",
+      "date": "2026-01-08",
+      "message": "updated maps in readme.md",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "hash": "904dac94a35f41bb674abbcf43fbcc70cd3f0a3a",
+      "author": "originalankur",
+      "date": "2026-01-08",
+      "message": "poster images",
+      "category": "Development Update",
+      "files": [
+        "posters/marrakech_terracotta_20260108_180821.png",
+        "posters/melbourne_forest_20260108_181459.png",
+        "posters/san_francisco_sunset_20260108_184122.png",
+        "posters/singapore_neon_cyberpunk_20260108_184503.png",
+        "posters/washington_blueprint_20260108_184314.png"
+      ]
+    },
+    {
+      "hash": "a215ca38d36a118828ce329dee75d31af1c904dd",
+      "author": "Ankur Gupta",
+      "date": "2026-01-17",
+      "message": "Add example images to README",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "hash": "b2ddb19917913991e15ff7b15e0e5d970b614445",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "chore: update .gitignore to include .venv and .DS_Store",
+      "category": "Configuration",
+      "files": [
+        ".gitignore"
+      ]
+    },
+    {
+      "hash": "8c6da9d8eff9cdc382e3aae6c7b67e163e47a0bd",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "fix: replace os.sys with sys in imports",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "4cba06fea32fadf16511f166ca276134922e9c5e",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "fix: initialize THEME as an empty dictionary rather than None to avoid type errors",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "9e135f4de14692bb7fa85a2318f41f58b42bdd78",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "fix: handle coroutine returned by geocoder in get_coordinates function",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "56e3c7a78c2476a5925c2b99f7108073525a8a69",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "fix: update ax.set_position to use tuple for consistency",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "083a0cd72e29f57ec25545e33d30b5390a367431",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "feat: project graph to linear coordinates and crop it to fill the poster without distortion",
+      "category": "Feature",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "9721d9cbc0e7b6a36371748a79213575f3b42965",
+      "author": "lorenzofratus",
+      "date": "2026-01-18",
+      "message": "feat: update poster images and update README",
+      "category": "Feature",
+      "files": [
+        "README.md",
+        "posters/amsterdam_ocean_20260118_140624.png",
+        "posters/barcelona_warm_beige_20260118_140048.png",
+        "posters/budapest_copper_patina_20260118_151213.png",
+        "posters/dubai_midnight_blue_20260118_140807.png",
+        "posters/london_noir_20260118_150259.png",
+        "posters/marrakech_terracotta_20260118_143253.png",
+        "posters/melbourne_forest_20260118_153446.png",
+        "posters/moscow_noir_20260118_141923.png",
+        "posters/mumbai_contrast_zones_20260118_145843.png",
+        "posters/new_york_noir_20260118_135113.png",
+        "posters/old/barcelona_warm_beige_20260108_172924.png",
+        "posters/old/chicago_noir_20260108_173313.png",
+        "posters/old/dubai_midnight_blue_20260108_174920.png",
+        "posters/old/marrakech_terracotta_20260108_180821.png",
+        "posters/old/melbourne_forest_20260108_181459.png",
+        "posters/old/mumbai_contrast_zones_20260108_170325.png",
+        "posters/old/mumbai_contrast_zones_20260108_172010.png",
+        "posters/old/new_york_noir_20260108_164217.png",
+        "posters/old/new_york_noir_20260108_172453.png",
+        "posters/old/san_francisco_sunset_20260108_184122.png",
+        "posters/old/singapore_neon_cyberpunk_20260108_184503.png",
+        "posters/old/tokyo_japanese_ink_20260108_165830.png",
+        "posters/old/venice_blueprint_20260108_165527.png",
+        "posters/old/washington_blueprint_20260108_184314.png",
+        "posters/paris_pastel_dream_20260118_141126.png",
+        "posters/rome_warm_beige_20260118_143425.png",
+        "posters/san_francisco_sunset_20260118_144726.png",
+        "posters/singapore_neon_cyberpunk_20260118_153328.png",
+        "posters/sydney_ocean_20260118_145507.png",
+        "posters/tokyo_japanese_ink_20260118_142446.png",
+        "posters/venice_blueprint_20260118_140505.png"
+      ]
+    },
+    {
+      "hash": "34b62051de28b25f80302f7bce90f026d72de2b6",
+      "author": "poo-ke",
+      "date": "2026-01-19",
+      "message": "Add SVG/PDF export support via --format flag",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "f83ab2e8297c0cd0a817af71b902e2ce774e8871",
+      "author": "Ankur Gupta",
+      "date": "2026-01-20",
+      "message": "Merge pull request #57 from poo-ke/feature/svg-pdf-export",
+      "category": "Development Update",
+      "files": []
+    },
+    {
+      "hash": "33e3beca26f96813c0d3d9aca67efe31e4ce52a1",
+      "author": "cstoked",
+      "date": "2026-01-17",
+      "message": "fix: filter point geometries to prevent dots on rendered maps",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py",
+        "posters/san_francisco_sunset_20260117_224834.png"
+      ]
+    },
+    {
+      "hash": "651a1fbb235e8b12216339e4f48e026aa6a8fe59",
+      "author": "Harold Th\u00c3\u00a9tiot",
+      "date": "2026-01-19",
+      "message": "Dynamically adjust font size based on city name length to prevent truncation",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "76dceb06d2d35d17fca5a96c17eb09fa005b591a",
+      "author": "Rory-Lee",
+      "date": "2026-01-20",
+      "message": "Increase Nominatim timeout to 10 seconds",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "849cf27a72920ee4dca217389a459e8aa1a1f126",
+      "author": "Mirano",
+      "date": "2026-01-20",
+      "message": "Add files via upload",
+      "category": "Development Update",
+      "files": [
+        "README.md",
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "20802e1f8f91e1fe45ebe5022e523f15e3c2c3e0",
+      "author": "khannurien",
+      "date": "2026-01-17",
+      "message": "Cache downloaded data",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "d786bb6f5046e55372244dc6803cb047e9a362f2",
+      "author": "khannurien",
+      "date": "2026-01-18",
+      "message": "Strengthened cache handling: added hashing to filenames, improved error handling",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "adea49c880f46e0646bd510067a487a6f82e98cb",
+      "author": "khannurien",
+      "date": "2026-01-18",
+      "message": "Moved rate limiting out of the cache path",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "be6d2b6b02d66038bc1cfdb47ba757303732a80f",
+      "author": "Harold Th\u00c3\u00a9tiot",
+      "date": "2026-01-19",
+      "message": "Dynamically adjust font size based on city name length to prevent truncation",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "83e3e6be291dcc6b92705515fc14ef0074caa8cd",
+      "author": "Rory-Lee",
+      "date": "2026-01-20",
+      "message": "Increase Nominatim timeout to 10 seconds",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "d004944e7f63bcb60b19120490f8450bc674c05b",
+      "author": "Mirano",
+      "date": "2026-01-20",
+      "message": "Add files via upload",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "e3439cdb363ffc79ff983f331fb6ec4ed6a8e8c2",
+      "author": "Lorenzo Fratus",
+      "date": "2026-01-20",
+      "message": "Merge pull request #1 from originalankur/main",
+      "category": "Development Update",
+      "files": []
+    },
+    {
+      "hash": "f81c5757b1091ac902390dfb561bb475884d3450",
+      "author": "lorenzofratus",
+      "date": "2026-01-20",
+      "message": "Merge remote-tracking branch 'origin/main' into feat/crop-to-aspect-ratio",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "f62be0efa5d88da36f7c9b7bdcdc3ab21b948c92",
+      "author": "originalankur",
+      "date": "2026-01-20",
+      "message": "Merge branch 'lorenzofratus-feat/crop-to-aspect-ratio'",
+      "category": "Development Update",
+      "files": []
+    },
+    {
+      "hash": "a9f386e7a3124046d4490b1025570e5c890b724e",
+      "author": "Adam Stachowicz",
+      "date": "2026-01-20",
+      "message": "GH Actions: Add actions-label-merge-conflict",
+      "category": "Development Update",
+      "files": [
+        ".github/workflows/conflicts.yml"
+      ]
+    },
+    {
+      "hash": "855bc561e760c214e1733c3df1f069e66765dbea",
+      "author": "originalankur",
+      "date": "2026-01-21",
+      "message": "resolved conflicts to merge",
+      "category": "Development Update",
+      "files": [
+        "README.md",
+        "create_map_poster.py",
+        "posters/amsterdam_ocean_20260121_120007.png",
+        "posters/venice_blueprint_20260120_224440.png"
+      ]
+    },
+    {
+      "hash": "ac4784b842b3750f45bf4a2e3315e79911b5fa52",
+      "author": "Ankur Gupta",
+      "date": "2026-01-21",
+      "message": "Update README to remove latitude and longitude options",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "hash": "cb40cfed5246db97dc4279c73d07b9d75cf655c1",
+      "author": "Nate Stoddart",
+      "date": "2026-01-22",
+      "message": "Retain edge nodes (#27)",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "92dacd2ffc56e9af413c29ade7d0c469f946bfff",
+      "author": "Kevin Joshua",
+      "date": "2026-01-22",
+      "message": "fixed map warping and allow variable poster dimensions (#59)",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "4beae007c28fb5a82d5e83f0e84f2b0e2e0b1cff",
+      "author": "originalankur",
+      "date": "2026-01-22",
+      "message": "font size scales dynamically based on poster's width",
+      "category": "Development Update",
+      "files": [
+        "README.md",
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "35dc978969462ce12e21a48f3f96cff361882282",
+      "author": "Tirtharaj Karmakar",
+      "date": "2026-01-24",
+      "message": "Two more new theme that should really look good! (#114)",
+      "category": "UI/Styling",
+      "files": [
+        ".gitignore",
+        "README.md",
+        "posters/seattle_emerald_20260124_162244.png",
+        "themes/emerald.json"
+      ]
+    },
+    {
+      "hash": "a0aaa6cceca2e8891d534815b9ad8998791d6324",
+      "author": "Adam Stachowicz",
+      "date": "2026-01-26",
+      "message": "Fix cache dir after 855bc561e760c214e1733c3df1f069e66765dbea (#109)",
+      "category": "Bug Fix",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "548820d673fd6285865a40d16fcf8a425871c089",
+      "author": "Ankur Gupta",
+      "date": "2026-01-26",
+      "message": "Enforced max limit of width and height to 20. Enough to get 4k resolution posters. Also default distance to 18000 from 12000 (#128)",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "ec6c0ffa9e9f80ec508f569ba1cecad8863b4663",
+      "author": "Ankur Gupta",
+      "date": "2026-01-26",
+      "message": "Max limits on w h in inches (#129)",
+      "category": "Development Update",
+      "files": [
+        "README.md",
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "6c4bb6b30a31e713ad973bfce73845bf1d043b95",
+      "author": "Nate Stoddart",
+      "date": "2026-01-26",
+      "message": "Allow specifying custom coordinates (#106)",
+      "category": "Development Update",
+      "files": [
+        "README.md",
+        "create_map_poster.py",
+        "requirements.txt"
+      ]
+    },
+    {
+      "hash": "bb326177371e1e87c7bcd5f4fdcc0bfe286bbe55",
+      "author": "Ankur Gupta",
+      "date": "2026-01-26",
+      "message": "Remove the feature_based theme and defaulted to terracotta (#131)",
+      "category": "UI/Styling",
+      "files": [
+        "README.md",
+        "create_map_poster.py",
+        "themes/feature_based.json"
+      ]
+    },
+    {
+      "hash": "e428fe0f448e4cd489c4d076b4de574c7f89729b",
+      "author": "Antoine Glacet",
+      "date": "2026-01-26",
+      "message": "feat: add i18n support with Google Fonts integration (rebased)",
+      "category": "Feature",
+      "files": [
+        "create_map_poster.py",
+        "font_management.py",
+        "pr_examples/bangkok_thai.png",
+        "pr_examples/dubai_arabic.png",
+        "pr_examples/seoul_korean.png",
+        "pr_examples/tokyo_japanese.png"
+      ]
+    },
+    {
+      "hash": "f6763993d5d441a08b9f5057e64b4f791abca035",
+      "author": "Antoine Glacet",
+      "date": "2026-01-26",
+      "message": "docs: address maintainer review feedback on README",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "hash": "3758729df1f3d10b9e33e83e2527acf6d609895b",
+      "author": "Antoine Glacet",
+      "date": "2026-01-27",
+      "message": "refactor: address PR review feedback",
+      "category": "Refactor",
+      "files": [
+        "create_map_poster.py",
+        "font_management.py",
+        "pr_examples/bangkok_thai.png",
+        "pr_examples/dubai_arabic.png",
+        "pr_examples/seoul_korean.png",
+        "pr_examples/tokyo_japanese.png"
+      ]
+    },
+    {
+      "hash": "56a9dcd17b17ea55a183de0ce858332cd819d136",
+      "author": "Adam Stachowicz",
+      "date": "2026-01-27",
+      "message": "GH Actions: PR check (#98)",
+      "category": "Development Update",
+      "files": [
+        ".github/workflows/pr-checks.yml",
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "0767b749137d98f54c76e5b4eb58f9507b1e4e21",
+      "author": "originalankur",
+      "date": "2026-01-27",
+      "message": "manual merge",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "60b7988526d096549af484dbe10291ddca108a59",
+      "author": "originalankur",
+      "date": "2026-01-27",
+      "message": "Fixed merge conflict issues and add test/all_variations.sh to create posters testing all variations of cli arguments",
+      "category": "Bug Fix",
+      "files": [
+        "README.md",
+        "create_map_poster.py",
+        "test/all_variations.sh"
+      ]
+    },
+    {
+      "hash": "28527d124fbb7932abc7d5c874fee0464e149d1f",
+      "author": "originalankur",
+      "date": "2026-01-27",
+      "message": "Flake8 added for git hook and also ran it against the code",
+      "category": "Development Update",
+      "files": [
+        ".flake8",
+        "create_map_poster.py",
+        "requirements.txt"
+      ]
+    },
+    {
+      "hash": "ef7b2645c3fdeb57f4a5455a1aca5532b430843a",
+      "author": "Mudit Bhargava",
+      "date": "2026-01-27",
+      "message": "feat: add uv package manager support and fix rendering bugs (#135)",
+      "category": "Feature",
+      "files": [
+        ".gitignore",
+        "CHANGELOG.md",
+        "README.md",
+        "create_map_poster.py",
+        "pyproject.toml",
+        "test/all_variations.sh",
+        "uv.lock"
+      ]
+    },
+    {
+      "hash": "1cf53560b3222ec12935fed786b0650787c00cc9",
+      "author": "Adam Stachowicz",
+      "date": "2026-01-30",
+      "message": "GHA: Fix types check and scan all files + fix some warnings (#149)",
+      "category": "Development Update",
+      "files": [
+        ".github/workflows/pr-checks.yml",
+        "README.md",
+        "create_map_poster.py",
+        "font_management.py",
+        "requirements.txt"
+      ]
+    },
+    {
+      "hash": "6bf8bf32cf79f23ca532cb25794226ec13b304fe",
+      "author": "Zachary Kornbluth",
+      "date": "2026-01-30",
+      "message": "Add bays and straits as water features (#142)",
+      "category": "Development Update",
+      "files": [
+        "create_map_poster.py"
+      ]
+    },
+    {
+      "hash": "fffad0c276f5bbab1e6f242144126c574f72705a",
+      "author": "Ankur Gupta",
+      "date": "2026-01-30",
+      "message": "Updated README.md to include Contributor's Guide/Notes",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "hash": "6d03069f34558494ccc7fc2a7de87df7a7543fd5",
+      "author": "Geert Folkertsma",
+      "date": "2026-03-01",
+      "message": "Update README.md (#184)",
+      "category": "Documentation",
+      "files": [
+        "README.md"
+      ]
+    }
+  ]
+}

@@ -5,8 +5,14 @@ Handles font loading, Google Fonts integration, and caching.
 
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Optional
+
+# Force stdout/stderr to use UTF-8 encoding on Windows to prevent UnicodeEncodeError
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 import requests
 

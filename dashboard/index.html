@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapPoster Studio - Premium Art Generator</title>
+    <!-- Google Fonts: Outfit (modern geometric sans) and Inter (highly legible UI body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Abstract Ambient Glowing Orbs for immersive visual depth -->
+    <div class="ambient-glow orb-1"></div>
+    <div class="ambient-glow orb-2"></div>
+    <div class="ambient-glow orb-3"></div>
+
+    <div class="dashboard-wrapper">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">🗺️</div>
+                <div class="brand-text">
+                    <h1>MapPoster <span>Studio</span></h1>
+                    <p class="tagline">Generate award-winning minimalist city maps</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator"></span>
+                <span class="status-text">Server Connected</span>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="dashboard-content">
+            <!-- LEFT PANEL: CONTROL CENTER -->
+            <section class="control-panel glass-card">
+                <div class="panel-header">
+                    <h2><span class="step-num">01</span> Configuration</h2>
+                    <p class="section-desc">Define your location and canvas parameters</p>
+                </div>
+
+                <form id="poster-form" onsubmit="return false;">
+                    <!-- Location Fields -->
+                    <div class="form-row split">
+                        <div class="form-group">
+                            <label for="input-city">City <span class="required">*</span></label>
+                            <input type="text" id="input-city" placeholder="e.g. Paris" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-country">Country <span class="required">*</span></label>
+                            <input type="text" id="input-country" placeholder="e.g. France" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Distance Slider -->
+                    <div class="form-group">
+                        <div class="slider-header">
+                            <label for="input-distance">Map Viewport Radius</label>
+                            <span class="slider-value" id="distance-value">12,000 meters</span>
+                        </div>
+                        <input type="range" id="input-distance" min="3000" max="25000" step="500" value="12000" class="premium-slider">
+                        <div class="slider-labels">
+                            <span>Dense Center (3k)</span>
+                            <span>Standard (12k)</span>
+                            <span>Full Metro (25k)</span>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="divider"></div>
+
+                    <!-- Dropdown for Advanced Options Toggle -->
+                    <details class="advanced-details">
+                        <summary class="advanced-summary">
+                            <span>⚙️ Advanced Settings (i18n & overrides)</span>
+                            <span class="toggle-icon">▼</span>
+                        </summary>
+                        <div class="advanced-content form-row">
+                            <!-- Custom Coordinates -->
+                            <div class="form-row split">
+                                <div class="form-group">
+                                    <label for="input-lat">Override Latitude</label>
+                                    <input type="text" id="input-lat" placeholder="e.g. 48.8588">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-long">Override Longitude</label>
+                                    <input type="text" id="input-long" placeholder="e.g. 2.3200">
+                                </div>
+                            </div>
+
+                            <!-- Custom Display Labels -->
+                            <div class="form-row split">
+                                <div class="form-group">
+                                    <label for="input-display-city">Display City (e.g., 東京)</label>
+                                    <input type="text" id="input-display-city" placeholder="e.g. PARIS">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-display-country">Display Country (e.g., 日本)</label>
+                                    <input type="text" id="input-display-country" placeholder="e.g. FRANCE">
+                                </div>
+                            </div>
+
+                            <!-- Google Fonts & Label Overrides -->
+                            <div class="form-row split">
+                                <div class="form-group">
+                                    <label for="input-font-family">Google Font Family</label>
+                                    <input type="text" id="input-font-family" placeholder="e.g. Noto Sans JP">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-country-label">Custom Country Subtitle</label>
+                                    <input type="text" id="input-country-label" placeholder="e.g. Île-de-France, France">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="divider"></div>
+
+                    <!-- Theme Section -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="panel-header">
+                            <h2><span class="step-num">02</span> Style Theme</h2>
+                            <p class="section-desc">Select an artistic colorway palette</p>
+                        </div>
+                        <button id="btn-open-theme-builder" type="button" class="action-btn text-accent" style="padding: 6px 14px; font-size: 11px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 8px; color: #f59e0b; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-smooth);">
+                            🎨 Custom Studio
+                        </button>
+                    </div>
+
+                    <div class="themes-grid" id="themes-grid">
+                        <!-- Themes loaded dynamically -->
+                        <div class="theme-skeleton"></div>
+                        <div class="theme-skeleton"></div>
+                        <div class="theme-skeleton"></div>
+                        <div class="theme-skeleton"></div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Dimensions & Format -->
+                    <div class="panel-header">
+                        <h2><span class="step-num">03</span> Export Details</h2>
+                        <p class="section-desc">Configure resolution and canvas dimensions</p>
+                    </div>
+
+                    <div class="form-row split">
+                        <div class="form-group">
+                            <label for="input-width">Width (Inches)</label>
+                            <input type="number" id="input-width" min="3" max="20" step="0.5" value="12">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-height">Height (Inches)</label>
+                            <input type="number" id="input-height" min="3" max="20" step="0.5" value="16">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-format">File Format</label>
+                            <select id="input-format" class="premium-select">
+                                <option value="png">PNG (High-res Raster)</option>
+                                <option value="svg">SVG (Infinite Vector)</option>
+                                <option value="pdf">PDF (Print Vector)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="btn-generate" class="generate-button">
+                        <span class="btn-text">Generate Poster</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- RIGHT PANEL: INTERACTIVE PREVIEW & GALLERY -->
+            <section class="preview-panel">
+                <!-- PREVIEW CONTAINER -->
+                <div class="preview-container glass-card" id="preview-container">
+                    <div class="panel-badge">Interactive Canvas Preview</div>
+
+                    <div class="canvas-wrapper" id="canvas-wrapper">
+                        <!-- Mock Frame Placeholder -->
+                        <div class="mock-frame" id="mock-frame">
+                            <div class="poster-preview" id="poster-preview">
+                                <div class="placeholder-content">
+                                    <div class="placeholder-icon">🗺️</div>
+                                    <h3>Ready to Generate</h3>
+                                    <p>Enter a city, choose an artistic style theme, and hit Generate to see your artwork render in real-time.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scan Loading Overlay -->
+                        <div class="scanner-overlay" id="scanner-overlay">
+                            <div class="radar-scan">
+                                <div class="radar-beam"></div>
+                                <div class="grid-mesh"></div>
+                            </div>
+                            <div class="progress-details">
+                                <div class="spinner"></div>
+                                <div class="progress-title">Mapping Geospatial Layers...</div>
+                                <div class="progress-status" id="progress-status">Downloading street graphs...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Render Results Panel -->
+                    <div class="results-actions" id="results-actions">
+                        <div class="file-info">
+                            <span class="file-name" id="file-name">paris_warm_beige_2026.png</span>
+                            <span class="file-resolution" id="file-resolution">300 DPI High Quality</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-btn inspect-btn" id="btn-inspect">📜 View System Logs</button>
+                            <a class="action-btn download-btn" id="btn-download" download>📥 Download Artwork</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECENT POSTERS CAROUSEL -->
+                <div class="gallery-container glass-card">
+                    <div class="gallery-header">
+                        <h3>📚 Recent Creations</h3>
+                        <span class="gallery-count" id="gallery-count">0 posters saved</span>
+                    </div>
+                    <div class="gallery-grid" id="gallery-grid">
+                        <!-- Loaded dynamically -->
+                        <div class="gallery-empty">No local posters detected yet. Generated posters will appear here!</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SYSTEM LOGS DRAWER OVERLAY -->
+    <div class="logs-drawer-overlay" id="logs-drawer-overlay">
+        <div class="logs-drawer glass-card">
+            <div class="drawer-header">
+                <h3>📜 System Execution Logs</h3>
+                <button class="close-drawer" id="btn-close-logs">✕</button>
+            </div>
+            <pre class="logs-console" id="logs-console">Launching subprocess logs...</pre>
+        </div>
+    </div>
+
+    <!-- THEME BUILDER DRAWER OVERLAY -->
+    <div class="theme-builder-overlay" id="theme-builder-overlay">
+        <div class="theme-builder-drawer glass-card">
+            <div class="drawer-header">
+                <h3>🎨 Custom Theme Studio</h3>
+                <button class="close-drawer" id="btn-close-theme-builder">✕</button>
+            </div>
+            
+            <p class="section-desc" style="margin-bottom: 15px;">Design your own custom minimalist color palette and save it to your local studio library.</p>
+            
+            <form id="theme-builder-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 18px;">
+                <div class="form-group">
+                    <label for="theme-name">Theme Name <span class="required">*</span></label>
+                    <input type="text" id="theme-name" placeholder="e.g. Cyberpunk Violet" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="theme-desc">Short Description</label>
+                    <input type="text" id="theme-desc" placeholder="e.g. Dark synthwave with neon purple accents" autocomplete="off">
+                </div>
+                
+                <div class="color-pickers-grid">
+                    <div class="color-picker-item">
+                        <label for="color-bg">Canvas Background</label>
+                        <div class="picker-wrapper">
+                            <input type="color" id="color-bg" value="#0F0F1A">
+                            <span class="color-hex-label">#0F0F1A</span>
+                        </div>
+                    </div>
+                    <div class="color-picker-item">
+                        <label for="color-text">Typography Text</label>
+                        <div class="picker-wrapper">
+                            <input type="color" id="color-text" value="#E1E1F5">
+                            <span class="color-hex-label">#E1E1F5</span>
+                        </div>
+                    </div>
+                    <div class="color-picker-item">
+                        <label for="color-road">Primary Roads (Accent)</label>
+                        <div class="picker-wrapper">
+                            <input type="color" id="color-road" value="#A855F7">
+                            <span class="color-hex-label">#A855F7</span>
+                        </div>
+                    </div>
+                    <div class="color-picker-item">
+                        <label for="color-water">Water Features</label>
+                        <div class="picker-wrapper">
+                            <input type="color" id="color-water" value="#1E1B4B">
+                            <span class="color-hex-label">#1E1B4B</span>
+                        </div>
+                    </div>
+                    <div class="color-picker-item">
+                        <label for="color-parks">Parks & Greenery</label>
+                        <div class="picker-wrapper">
+                            <input type="color" id="color-parks" value="#14532D">
+                            <span class="color-hex-label">#14532D</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Real-time Mini Preview -->
+                <div class="theme-mini-preview" id="theme-mini-preview">
+                    <div class="mini-canvas-mock" id="mini-canvas-mock">
+                        <div class="mini-water" id="mini-water"></div>
+                        <div class="mini-park" id="mini-parks"></div>
+                        <div class="mini-road main-road" id="mini-road-1"></div>
+                        <div class="mini-road secondary-road" id="mini-road-2"></div>
+                        <div class="mini-text" id="mini-text">PARIS</div>
+                        <div class="mini-subtext" id="mini-subtext">FRANCE</div>
+                    </div>
+                    <p style="font-size: 10px; color: var(--text-secondary); text-align: center; margin-top: 5px;">Live Palette Mockup</p>
+                </div>
+
+                <button id="btn-save-theme" class="generate-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); width: 100%; margin-top: 10px;">
+                    <span class="btn-text">Save Theme & Apply</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

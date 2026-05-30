@@ -14,6 +14,11 @@ import os
 import pickle
 import sys
 import time
+
+# Force stdout/stderr to use UTF-8 encoding on Windows to prevent UnicodeEncodeError
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 from datetime import datetime
 from pathlib import Path
 from typing import cast
