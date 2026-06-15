@@ -639,6 +639,38 @@
         "font_management.py",
         "themes/custom_integration_cyberpunk.json"
       ]
+    },
+    {
+      "hash": "dfcb0cb09626c8389e8a27841529c66f8d7c790e",
+      "author": "Ai Geek Hub",
+      "date": "2026-06-15",
+      "message": "feat(dashboard): implement print-on-demand simulator, visual crop map, and async generation task tracking",
+      "category": "Feature",
+      "files": [
+        "dashboard/app.js",
+        "dashboard/dev_history.json",
+        "dashboard/index.html",
+        "dashboard/server.py",
+        "dashboard/style.css",
+        "development_log.md",
+        "skills/dev-navigator/SKILL.md",
+        "skills/dev-navigator/scripts/github_version.py",
+        "skills/dev-navigator/scripts/linear_sync.py",
+        "skills/dev-navigator/scripts/scan_repo.py",
+        "skills/dev-navigator/scripts/setup_hooks.py",
+        "skills/dev-navigator/templates/development_log.md",
+        "start_local_services.py"
+      ]
+    },
+    {
+      "hash": "6e18263d30247f514c8d98154e89d696fdc0f441",
+      "author": "Ai Geek Hub",
+      "date": "2026-06-15",
+      "message": "chore: fix package.json check in github_version",
+      "category": "Configuration",
+      "files": [
+        "skills/dev-navigator/scripts/github_version.py"
+      ]
     }
   ]
 }
