@@ -671,6 +671,19 @@
       "files": [
         "skills/dev-navigator/scripts/github_version.py"
       ]
+    },
+    {
+      "hash": "9981d7bb12eb97c902ad1aff73f1ef42638e9bab",
+      "author": "Ai Geek Hub",
+      "date": "2026-06-15",
+      "message": "chore(release): bump version to 1.2.0 and update changelogs",
+      "category": "Configuration",
+      "files": [
+        "RELEASE_NOTES.md",
+        "dashboard/dev_history.json",
+        "development_log.md",
+        "version.json"
+      ]
     }
   ]
 }

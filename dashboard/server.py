@@ -58,6 +58,13 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
 
         return str((DASHBOARD_DIR / relative_path).resolve())
 
+    def end_headers(self):
+        """Send cache control headers to prevent aggressive browser caching."""
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_OPTIONS(self):
         """
         Supports CORS preflight requests for API testing.

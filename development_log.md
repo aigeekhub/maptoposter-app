@@ -1,6 +1,6 @@
 # DevNavigator - Development Journal
 
-*Last updated: 2026-06-15 03:30:51*
+*Last updated: 2026-06-15 03:31:01*
 
 ## System Architecture & Components
 
@@ -12,6 +12,18 @@
 ---
 
 ## Detailed Development Timeline
+
+### Version/Update: chore(release): bump version to 1.2.0 and update changelogs
+- **Author**: Ai Geek Hub
+- **Date**: June 15, 2026
+- **Hash**: `9981d7bb`
+- **Classification**: `Configuration`
+
+#### Impacted Files
+- `RELEASE_NOTES.md`
+- `dashboard/dev_history.json`
+- `development_log.md`
+- `version.json`
 
 ### Version/Update: chore: fix package.json check in github_version
 - **Author**: Ai Geek Hub
