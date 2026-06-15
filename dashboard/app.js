@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeThemeId = "terracotta";
     let systemThemes = [];
     let currentLogsText = "";
+    
+    // Leaflet state
+    let cropMap = null;
+    let mapVisible = false;
 
     // DOM Elements Bindings
     const form = document.getElementById("poster-form");
@@ -54,9 +58,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Form inputs change/input handlers
     inputDistance.addEventListener("input", (e) => {
-        const val = parseInt(e.target.value).toLocaleString();
-        distanceValue.textContent = `${val} meters`;
+        const val = parseInt(e.target.value);
+        distanceValue.textContent = `${val.toLocaleString()} meters`;
+        if (cropMap && mapVisible) {
+            cropMap.setZoom(getZoomFromDistance(val));
+        }
     });
+
+    function getZoomFromDistance(dist) {
+        if (dist <= 1500) return 16;
+        if (dist <= 3000) return 15;
+        if (dist <= 6000) return 14;
+        if (dist <= 12000) return 13;
+        if (dist <= 24000) return 12;
+        return 11;
+    }
 
     // Enforce limits on width and height
     const enforceInputMax = (el, max) => {
@@ -81,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch all themes dynamically
     async function fetchThemes() {
         try {
-            const response = await fetch("/api/themes");
+            const response = await fetch("api/themes");
             if (!response.ok) throw new Error("Failed to load themes.");
             
             systemThemes = await response.json();
@@ -105,12 +121,21 @@ document.addEventListener("DOMContentLoaded", () => {
             card.className = `theme-card ${theme.id === activeThemeId ? "active" : ""}`;
             card.dataset.id = theme.id;
 
+            const hasPreview = theme.preview_image ? true : false;
+
             card.innerHTML = `
-                <div class="theme-preview-bubble">
-                    <div class="theme-bubble-split">
-                        <div class="bubble-bg" style="background-color: ${theme.bg}"></div>
-                        <div class="bubble-accent" style="background-color: ${theme.road_primary}"></div>
-                    </div>
+                <div class="theme-poster-thumbnail">
+                    ${hasPreview ? 
+                        `<img src="${theme.preview_image}" alt="${theme.name}" class="theme-mini-poster" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                         <div class="theme-bubble-split" style="display: none;">
+                            <div class="bubble-bg" style="background-color: ${theme.bg}"></div>
+                            <div class="bubble-accent" style="background-color: ${theme.road_primary}"></div>
+                         </div>` : 
+                        `<div class="theme-bubble-split">
+                            <div class="bubble-bg" style="background-color: ${theme.bg}"></div>
+                            <div class="bubble-accent" style="background-color: ${theme.road_primary}"></div>
+                         </div>`
+                    }
                 </div>
                 <div class="theme-card-info">
                     <span class="theme-card-title">${theme.name}</span>
@@ -123,14 +148,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 card.classList.add("active");
                 activeThemeId = theme.id;
                 updateAccentThemeColor(theme);
+
+                // Auto update main placeholder canvas preview to show selected theme's mockup poster
+                if (theme.preview_image) {
+                    posterPreview.innerHTML = `
+                        <img src="${theme.preview_image}" alt="${theme.name} Theme Preview" class="poster-img" style="opacity: 0; transition: opacity 0.5s ease; width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                    `;
+                    setTimeout(() => {
+                        const img = posterPreview.querySelector("img");
+                        if (img) img.style.opacity = "1";
+                    }, 50);
+
+                    // Mock the filename details
+                    fileNameDisplay.textContent = `${theme.id}_preview.png`;
+                    btnDownload.href = theme.preview_image;
+                    btnDownload.setAttribute("download", `${theme.id}_preview.png`);
+                    resultsActions.classList.add("active");
+                }
             });
 
             themesGrid.appendChild(card);
         });
 
-        // Set initial theme accent colors
+        // Set initial theme accent colors & preview
         const initialTheme = themes.find(t => t.id === activeThemeId);
-        if (initialTheme) updateAccentThemeColor(initialTheme);
+        if (initialTheme) {
+            updateAccentThemeColor(initialTheme);
+            if (initialTheme.preview_image) {
+                // Show default preview on load
+                posterPreview.innerHTML = `
+                    <img src="${initialTheme.preview_image}" alt="${initialTheme.name} Theme Preview" class="poster-img" style="opacity: 1; width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                `;
+                fileNameDisplay.textContent = `${initialTheme.id}_preview.png`;
+                btnDownload.href = initialTheme.preview_image;
+                btnDownload.setAttribute("download", `${initialTheme.id}_preview.png`);
+                resultsActions.classList.add("active");
+            }
+        }
     }
 
     // Dynamically update UI accents based on selected theme
@@ -142,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch recently generated posters
     async function fetchRecentPosters() {
         try {
-            const response = await fetch("/api/recent");
+            const response = await fetch("api/recent");
             if (!response.ok) throw new Error("Failed to load posters.");
             
             const posters = await response.json();
@@ -263,33 +317,62 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2200);
 
         try {
-            const response = await fetch("/api/generate", {
+            const response = await fetch("api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
-            clearInterval(phaseTimer);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: response.statusText }));
+                throw new Error(errorData.error || `Server responded with status ${response.status}`);
+            }
 
-            const result = await response.json();
+            const initialResult = await response.json();
             
-            if (result.success) {
-                // Succeeded! Load image
-                loadPosterToPreview({
-                    name: result.filename,
-                    path: result.url
-                });
-                
-                // Keep the raw output logs ready for inspection
-                currentLogsText = result.log;
-                
-                // Refresh registry list
-                fetchRecentPosters();
-            } else {
-                // Failed. Show logs drawer instantly
-                currentLogsText = result.error;
-                openLogsDrawer();
-                showNotification("Generation failed. See console logs for details.", "error");
+            if (!initialResult.success || !initialResult.task_id) {
+                throw new Error(initialResult.error || "Failed to initialize poster generation task.");
+            }
+
+            const taskId = initialResult.task_id;
+            let taskCompleted = false;
+
+            // Start polling the background task status
+            while (!taskCompleted) {
+                // Wait for 2000ms before next poll
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const pollResponse = await fetch(`api/tasks/status?task_id=${taskId}`);
+                if (!pollResponse.ok) {
+                    throw new Error(`Failed to query task progress: ${pollResponse.statusText}`);
+                }
+
+                const taskState = await pollResponse.json();
+
+                if (taskState.status === "completed") {
+                    taskCompleted = true;
+                    clearInterval(phaseTimer);
+
+                    // Succeeded! Load image
+                    loadPosterToPreview({
+                        name: taskState.filename,
+                        path: taskState.url
+                    });
+
+                    // Store stdout & stderr logs ready for inspection
+                    currentLogsText = `=== SUBPROCESS COMPLETED SUCCESSFULLY ===\n\n--- STDOUT ---\n${taskState.stdout || ""}\n\n--- STDERR ---\n${taskState.stderr || ""}`;
+                    
+                    // Refresh registry list
+                    fetchRecentPosters();
+                } else if (taskState.status === "failed") {
+                    taskCompleted = true;
+                    clearInterval(phaseTimer);
+
+                    currentLogsText = `=== SUBPROCESS FAILED ===\n\nError: ${taskState.error || "Unknown error"}\n\n--- STDOUT ---\n${taskState.stdout || ""}\n\n--- STDERR ---\n${taskState.stderr || ""}`;
+                    openLogsDrawer();
+                    showNotification("Generation failed. See console logs for details.", "error");
+                }
+                // If status is "running", loop continues and phaseTimer handles loader phase texts
             }
         } catch (error) {
             clearInterval(phaseTimer);
@@ -396,7 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try {
-            const response = await fetch("/api/themes/save", {
+            const response = await fetch("api/themes/save", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -447,6 +530,215 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => toast.remove(), 400);
         }, 4000);
     }
+
+    /* ==========================================================================
+       6. Interactive Crop Map (Leaflet) Controls
+       ========================================================================== */
+    const btnToggleMap = document.getElementById("btn-toggle-map");
+    const cropMapContainer = document.getElementById("crop-map-container");
+
+    btnToggleMap.addEventListener("click", () => {
+        mapVisible = !mapVisible;
+        if (mapVisible) {
+            cropMapContainer.style.display = "block";
+            btnToggleMap.textContent = "🗺️ Hide Interactive Crop Map";
+            btnToggleMap.classList.add("active");
+            initCropMap();
+        } else {
+            cropMapContainer.style.display = "none";
+            btnToggleMap.textContent = "🗺️ Crop Viewport Visually";
+            btnToggleMap.classList.remove("active");
+        }
+    });
+
+    function initCropMap() {
+        if (cropMap) {
+            setTimeout(() => cropMap.invalidateSize(), 50);
+            return;
+        }
+
+        let initLat = parseFloat(inputLat.value) || 48.8588;
+        let initLong = parseFloat(inputLong.value) || 2.3200;
+
+        cropMap = L.map('crop-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([initLat, initLong], getZoomFromDistance(parseInt(inputDistance.value)));
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20
+        }).addTo(cropMap);
+
+        // Map movement updates override lat/lon
+        cropMap.on('move', () => {
+            const center = cropMap.getCenter();
+            inputLat.value = center.lat.toFixed(6);
+            inputLong.value = center.lng.toFixed(6);
+        });
+
+        // Zoom movement updates map distance / radius
+        cropMap.on('zoomend', () => {
+            const bounds = cropMap.getBounds();
+            const east = bounds.getEast();
+            const center = cropMap.getCenter();
+            
+            // Calculate distance in meters
+            const distanceMeters = center.distanceTo(L.latLng(center.lat, east));
+            const clampedDist = Math.max(3000, Math.min(25000, Math.round(distanceMeters)));
+            
+            inputDistance.value = clampedDist;
+            distanceValue.textContent = `${clampedDist.toLocaleString()} meters`;
+        });
+    }
+
+    // Geocoding auto-pan link when location inputs blur
+    async function geocodeAndPanMap() {
+        const city = inputCity.value.trim();
+        const country = inputCountry.value.trim();
+        if (!city || !country) return;
+
+        try {
+            const query = `${city}, ${country}`;
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    
+                    inputLat.value = lat.toFixed(6);
+                    inputLong.value = lon.toFixed(6);
+                    
+                    if (cropMap) {
+                        cropMap.setView([lat, lon], cropMap.getZoom());
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Autofocus geocoding failed: ", e);
+        }
+    }
+    inputCity.addEventListener("blur", geocodeAndPanMap);
+    inputCountry.addEventListener("blur", geocodeAndPanMap);
+
+    /* ==========================================================================
+       7. Print-on-Demand (POD) Checkout Simulator
+       ========================================================================== */
+    const btnOpenPod = document.getElementById("btn-open-pod");
+    const btnClosePod = document.getElementById("btn-close-pod");
+    const podModalOverlay = document.getElementById("pod-modal-overlay");
+    const podPosterPreview = document.getElementById("pod-poster-preview");
+    const podProductType = document.getElementById("pod-product-type");
+    const podSize = document.getElementById("pod-size");
+    const podTotalPrice = document.getElementById("pod-total-price");
+    const podShippingForm = document.getElementById("pod-shipping-form");
+    const podCheckoutOverlay = document.getElementById("pod-checkout-overlay");
+    const btnSubmitPod = document.getElementById("btn-submit-pod");
+    const podProgressDetails = document.getElementById("pod-progress-details");
+
+    // Dynamic price updates
+    podSize.addEventListener("change", () => {
+        const selectedOption = podSize.options[podSize.selectedIndex];
+        const price = selectedOption.getAttribute("data-price");
+        podTotalPrice.textContent = `$${price} USD`;
+    });
+
+    btnOpenPod.addEventListener("click", () => {
+        const previewImg = posterPreview.querySelector("img");
+        if (!previewImg) {
+            showNotification("Please select a style theme or generate a poster first.", "info");
+            return;
+        }
+        podPosterPreview.src = previewImg.src;
+        podModalOverlay.classList.add("active");
+    });
+
+    function closePodModal() {
+        podModalOverlay.classList.remove("active");
+        podCheckoutOverlay.style.display = "none";
+        
+        // Reset overlay back to loader state
+        podProgressDetails.innerHTML = `
+            <div class="spinner" style="border-top-color: var(--accent);"></div>
+            <div class="progress-title" id="pod-checkout-status-title" style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-primary);">Submitting Print File...</div>
+            <div class="progress-status" id="pod-checkout-status-desc" style="font-size: 13px; color: var(--text-secondary);">Uploading high-resolution vector assets...</div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-top: 15px; overflow: hidden; position: relative;">
+                <div id="pod-checkout-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); transition: width 0.4s ease;"></div>
+            </div>
+        `;
+        podShippingForm.reset();
+    }
+
+    btnClosePod.addEventListener("click", closePodModal);
+    podModalOverlay.addEventListener("click", (e) => {
+        if (e.target === podModalOverlay) closePodModal();
+    });
+
+    btnSubmitPod.addEventListener("click", () => {
+        if (!podShippingForm.checkValidity()) {
+            podShippingForm.reportValidity();
+            return;
+        }
+
+        podCheckoutOverlay.style.display = "flex";
+        
+        const statusTitle = document.getElementById("pod-checkout-status-title");
+        const statusDesc = document.getElementById("pod-checkout-status-desc");
+        const progressBar = document.getElementById("pod-checkout-progress-bar");
+
+        // Step 1: Upload (0% -> 1.2s)
+        progressBar.style.width = "25%";
+        statusTitle.textContent = "Uploading High-Resolution File to Printful...";
+        statusDesc.textContent = "Syncing raster/vector source maps to cloud print storage...";
+
+        setTimeout(() => {
+            // Step 2: Address check (25% -> 2.4s)
+            progressBar.style.width = "55%";
+            statusTitle.textContent = "Validating Shipping Destination...";
+            statusDesc.textContent = "Verifying shipping address matches delivery carrier routing API...";
+
+            setTimeout(() => {
+                // Step 3: Print Routing (55% -> 3.6s)
+                progressBar.style.width = "85%";
+                statusTitle.textContent = "Routing Order to Local Factory...";
+                statusDesc.textContent = "Selecting nearest printing and framing warehouse to " + document.getElementById("pod-city").value + "...";
+
+                setTimeout(() => {
+                    // Step 4: Checkout complete (85% -> 4.5s)
+                    progressBar.style.width = "100%";
+                    statusTitle.textContent = "Creating Secure Checkout Order...";
+                    statusDesc.textContent = "Compiling wholesale invoicing details...";
+
+                    setTimeout(() => {
+                        // Complete dropship order success screen
+                        const orderNum = `PF-${Math.floor(Math.random() * 900000) + 100000}`;
+                        podProgressDetails.innerHTML = `
+                            <div class="pod-checkout-success">
+                                <div class="success-icon">✓</div>
+                                <h3>Order Placed Successfully!</h3>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                                    Your mock dropship order has been processed.
+                                </p>
+                                <div class="pod-order-number">Order ID: ${orderNum}</div>
+                                <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin: 5px 0;">
+                                    In production, this automatically calls Printful's API to print, package, and dropship this map directly to the customer.
+                                </p>
+                                <button id="btn-close-pod-success" class="action-btn" style="margin-top: 15px; padding: 10px 20px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-weight: 600;">
+                                    Done
+                                </button>
+                             </div>
+                        `;
+                        
+                        document.getElementById("btn-close-pod-success").addEventListener("click", () => {
+                            closePodModal();
+                        });
+                        
+                        showNotification("Mock dropship order completed!", "success");
+                    }, 1000);
+                }, 1200);
+            }, 1200);
+        }, 1200);
+    });
 
     // Add toast CSS dynamic inject if not present
     const style = document.createElement('style');

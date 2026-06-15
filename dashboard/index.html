@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Leaflet.js Interactive Maps CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 <body>
     <!-- Abstract Ambient Glowing Orbs for immersive visual depth -->
@@ -87,6 +90,17 @@
                                 <div class="form-group">
                                     <label for="input-long">Override Longitude</label>
                                     <input type="text" id="input-long" placeholder="e.g. 2.3200">
+                                </div>
+                            </div>
+
+                            <!-- Visual Crop Map Toggler -->
+                            <div class="form-group" style="margin-top: -10px;">
+                                <button type="button" id="btn-toggle-map" class="action-btn text-accent" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.03); border: 1px dashed var(--border-glass); border-radius: 8px; color: #f59e0b; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--transition-smooth);">
+                                    🗺️ Crop Viewport Visually
+                                </button>
+                                <div id="crop-map-container" style="display: none; height: 260px; border-radius: 10px; border: 1px solid var(--border-glass); overflow: hidden; margin-top: 10px; position: relative; z-index: 1;">
+                                    <div id="crop-map" style="width: 100%; height: 100%; background: #07070a;"></div>
+                                    <div class="map-center-crosshair">✛</div>
                                 </div>
                             </div>
 
@@ -212,6 +226,7 @@
                         </div>
                         <div class="action-buttons">
                             <button class="action-btn inspect-btn" id="btn-inspect">📜 View System Logs</button>
+                            <button class="action-btn pod-btn" id="btn-open-pod" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; border: none; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); transition: var(--transition-smooth);">🛒 Order Physical Print</button>
                             <a class="action-btn download-btn" id="btn-download" download>📥 Download Artwork</a>
                         </div>
                     </div>
@@ -318,6 +333,92 @@
                     <span class="btn-text">Save Theme & Apply</span>
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- PRINT-ON-DEMAND DROPSHIP CHECKOUT MODAL -->
+    <div class="pod-modal-overlay" id="pod-modal-overlay">
+        <div class="pod-modal">
+            <div class="modal-header">
+                <h3>🛒 Order Premium Physical Print</h3>
+                <button class="close-modal" id="btn-close-pod">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="pod-preview-wrapper">
+                    <div class="pod-frame-container">
+                        <img id="pod-poster-preview" src="posters/singapore_neon_cyberpunk_20260118_153328.png" alt="Poster Preview">
+                    </div>
+                </div>
+                <div class="pod-details">
+                    <div class="form-group">
+                        <label for="pod-product-type">Product Style</label>
+                        <select id="pod-product-type" class="premium-select">
+                            <option value="framed">Framed Poster (Matte Black Wood)</option>
+                            <option value="canvas">Stretched Canvas Print (Satin Wrap)</option>
+                            <option value="unframed">Premium Lustre Art Print (Unframed)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pod-size">Print Size & Pricing</label>
+                        <select id="pod-size" class="premium-select">
+                            <option value="8x10" data-price="24.99">8" x 10" — $24.99 USD</option>
+                            <option value="12x16" data-price="39.99" selected>12" x 16" — $39.99 USD</option>
+                            <option value="18x24" data-price="59.99">18" x 24" — $59.99 USD</option>
+                        </select>
+                    </div>
+                    
+                    <div class="divider" style="margin: 5px 0;"></div>
+                    
+                    <form id="pod-shipping-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="form-group">
+                            <label for="pod-name">Recipient Full Name</label>
+                            <input type="text" id="pod-name" required placeholder="John Doe" autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="pod-email">Email Address</label>
+                            <input type="email" id="pod-email" required placeholder="john@example.com" autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="pod-address">Shipping Street Address</label>
+                            <input type="text" id="pod-address" required placeholder="123 Gallery Way, Apt 2C" autocomplete="street-address">
+                        </div>
+                        <div class="form-row split">
+                            <div class="form-group" style="flex: 2;">
+                                <label for="pod-city">City</label>
+                                <input type="text" id="pod-city" required placeholder="New York">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="pod-zip">ZIP / Postal Code</label>
+                                <input type="text" id="pod-zip" required placeholder="10001">
+                            </div>
+                        </div>
+                        
+                        <div class="pod-price-summary">
+                            <span>Total (incl. Free Shipping):</span>
+                            <strong id="pod-total-price">$39.99 USD</strong>
+                        </div>
+                        
+                        <button id="btn-submit-pod" class="generate-button" style="margin-top: 10px; width: 100%;">
+                            <span class="btn-text">Proceed to Checkout</span>
+                            <span class="btn-glow"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Checkout Processing Overlay -->
+            <div class="pod-checkout-overlay" id="pod-checkout-overlay" style="display: none;">
+                <!-- States updated dynamically via JS -->
+                <div class="progress-details" id="pod-progress-details" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 450px; padding: 35px; text-align: center; gap: 10px;">
+                    <div class="spinner" style="border-top-color: var(--accent);"></div>
+                    <div class="progress-title" id="pod-checkout-status-title" style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-primary);">Submitting Print File...</div>
+                    <div class="progress-status" id="pod-checkout-status-desc" style="font-size: 13px; color: var(--text-secondary);">Uploading high-resolution vector assets...</div>
+                    
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-top: 15px; overflow: hidden; position: relative;">
+                        <div id="pod-checkout-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

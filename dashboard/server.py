@@ -9,7 +9,9 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import urllib.parse
+import uuid
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -24,6 +26,11 @@ REPO_ROOT = CURRENT_DIR.parent if CURRENT_DIR.name == "dashboard" else CURRENT_D
 THEMES_DIR = REPO_ROOT / "themes"
 POSTERS_DIR = REPO_ROOT / "posters"
 DASHBOARD_DIR = REPO_ROOT / "dashboard"
+
+# Active background tasks registry
+# maps task_id -> { "status": "running"|"completed"|"failed", "filename": str, "url": str, "stdout": str, "stderr": str, "error": str }
+ACTIVE_TASKS = {}
+
 
 
 class MapPosterHandler(SimpleHTTPRequestHandler):
@@ -85,6 +92,15 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
                                 with open(file, "r", encoding="utf-8") as f:
                                     data = json.load(f)
                                     theme_id = file.stem
+                                    # Search for a generated poster matching the theme_id to use as a preview thumbnail
+                                    preview_image = None
+                                    if POSTERS_DIR.exists():
+                                        # Sort by most recently modified first
+                                        for p_file in sorted(POSTERS_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+                                            if p_file.suffix.lower() == ".png" and f"_{theme_id}_" in p_file.name:
+                                                preview_image = f"posters/{p_file.name}"
+                                                break
+
                                     themes.append({
                                         "id": theme_id,
                                         "name": data.get("name", theme_id),
@@ -94,6 +110,7 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
                                         "water": data.get("water", "#a8c4c4"),
                                         "parks": data.get("parks", "#e8e0d0"),
                                         "road_primary": data.get("road_primary", "#1a1a1a"),
+                                        "preview_image": preview_image,
                                     })
                             except Exception as e:
                                 print(f"[WARN] Failed to read theme {file.name}: {e}")
@@ -117,7 +134,7 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
                         if file.suffix in [".png", ".svg", ".pdf"]:
                             posters.append({
                                 "name": file.name,
-                                "path": f"/posters/{file.name}",
+                                "path": f"posters/{file.name}",
                                 "format": file.suffix[1:].upper(),
                                 "mtime": file.stat().st_mtime,
                             })
@@ -129,6 +146,25 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(posters[:12]).encode("utf-8"))
             except Exception as e:
                 self.send_error_response(500, f"Failed to retrieve recent posters: {e}")
+
+        # API: Get background task status
+        elif parsed_url.path == "/api/tasks/status":
+            try:
+                query_params = urllib.parse.parse_qs(parsed_url.query)
+                task_id = query_params.get("task_id", [None])[0]
+
+                if not task_id or task_id not in ACTIVE_TASKS:
+                    self.send_error_response(404, "Task not found.")
+                    return
+
+                task_info = ACTIVE_TASKS[task_id]
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps(task_info).encode("utf-8"))
+            except Exception as e:
+                self.send_error_response(500, f"Failed to retrieve task status: {e}")
 
         # Serve static asset
         else:
@@ -150,8 +186,8 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
                     self.send_error_response(400, "Both 'city' and 'country' parameters are required.")
                     return
 
-                # Build CLI arguments to run create_map_poster.py via subprocess
-                cmd = ["uv", "run", "python", str(REPO_ROOT / "create_map_poster.py"), "-c", city, "-C", country]
+                python_bin = sys.executable if sys.executable else "python3"
+                cmd = [python_bin, str(REPO_ROOT / "create_map_poster.py"), "-c", city, "-C", country]
 
                 # Optional arguments
                 if params.get("theme"):
@@ -179,55 +215,98 @@ class MapPosterHandler(SimpleHTTPRequestHandler):
 
                 print(f"[SERVER] Spawning poster subprocess: {' '.join(cmd)}")
 
-                # Execute Python CLI
-                process = subprocess.run(
-                    cmd,
-                    cwd=str(REPO_ROOT),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
+                task_id = str(uuid.uuid4())
+                city_slug = city.lower().replace(" ", "_")
+                ext = params.get("format", "png").lower()
+
+                # Initialize active task entry
+                ACTIVE_TASKS[task_id] = {
+                    "success": False,
+                    "status": "running",
+                    "filename": None,
+                    "url": None,
+                    "stdout": "",
+                    "stderr": "",
+                    "error": None
+                }
+
+                def run_generation_thread(t_id, command, c_slug, f_ext):
+                    try:
+                        # Execute Python CLI
+                        process = subprocess.run(
+                            command,
+                            cwd=str(REPO_ROOT),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            encoding="utf-8",
+                            errors="replace",
+                        )
+
+                        if process.returncode == 0:
+                            # Find the newly created poster in the posters directory
+                            newest_file = None
+                            newest_time = 0
+                            if POSTERS_DIR.exists():
+                                for f in POSTERS_DIR.iterdir():
+                                    if f.name.startswith(c_slug) and f.suffix == f".{f_ext}":
+                                        mtime = f.stat().st_mtime
+                                        if mtime > newest_time:
+                                            newest_time = mtime
+                                            newest_file = f.name
+
+                            if newest_file:
+                                ACTIVE_TASKS[t_id].update({
+                                    "success": True,
+                                    "status": "completed",
+                                    "filename": newest_file,
+                                    "url": f"posters/{newest_file}",
+                                    "stdout": process.stdout,
+                                    "stderr": process.stderr
+                                })
+                            else:
+                                ACTIVE_TASKS[t_id].update({
+                                    "success": False,
+                                    "status": "failed",
+                                    "error": "Poster generated but file could not be retrieved.",
+                                    "stdout": process.stdout,
+                                    "stderr": process.stderr
+                                })
+                        else:
+                            ACTIVE_TASKS[t_id].update({
+                                "success": False,
+                                "status": "failed",
+                                "error": f"Subprocess terminated with code {process.returncode}.",
+                                "stdout": process.stdout,
+                                "stderr": process.stderr
+                            })
+                    except Exception as e:
+                        ACTIVE_TASKS[t_id].update({
+                            "success": False,
+                            "status": "failed",
+                            "error": f"Internal execution error: {e}"
+                        })
+
+                # Launch thread as daemon
+                thread = threading.Thread(
+                    target=run_generation_thread,
+                    args=(task_id, cmd, city_slug, ext)
                 )
+                thread.daemon = True
+                thread.start()
 
-                if process.returncode == 0:
-                    city_slug = city.lower().replace(" ", "_")
-                    ext = params.get("format", "png").lower()
-
-                    # Find the newly created poster in the posters directory
-                    newest_file = None
-                    newest_time = 0
-                    if POSTERS_DIR.exists():
-                        for f in POSTERS_DIR.iterdir():
-                            if f.name.startswith(city_slug) and f.suffix == f".{ext}":
-                                mtime = f.stat().st_mtime
-                                if mtime > newest_time:
-                                    newest_time = mtime
-                                    newest_file = f.name
-
-                    if newest_file:
-                        self.send_response(200)
-                        self.send_header("Content-Type", "application/json")
-                        self.send_header("Access-Control-Allow-Origin", "*")
-                        self.end_headers()
-                        self.wfile.write(
-                            json.dumps({
-                                "success": True,
-                                "filename": newest_file,
-                                "url": f"/posters/{newest_file}",
-                                "log": process.stdout,
-                            }).encode("utf-8")
-                        )
-                    else:
-                        self.send_error_response(
-                            500,
-                            f"Poster generated but file could not be retrieved.\nStdout:\n{process.stdout}",
-                        )
-                else:
-                    self.send_error_response(
-                        500,
-                        f"Subprocess terminated with code {process.returncode}.\n\n--- STDERR ---\n{process.stderr}\n\n--- STDOUT ---\n{process.stdout}",
-                    )
+                # Immediately return 202 Accepted response with task_id
+                self.send_response(202)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(
+                    json.dumps({
+                        "success": True,
+                        "task_id": task_id,
+                        "status": "running",
+                    }).encode("utf-8")
+                )
             except Exception as e:
                 self.send_error_response(500, f"Server Error during generation: {e}")
 
@@ -318,4 +397,11 @@ def run_server(port=8080):
 
 
 if __name__ == "__main__":
-    run_server()
+    import os
+    port_arg = 8085
+    for arg in sys.argv:
+        if arg.startswith("--port="):
+            port_arg = int(arg.split("=")[1])
+    if "PORT" in os.environ:
+        port_arg = int(os.environ["PORT"])
+    run_server(port_arg)
