@@ -123,7 +123,15 @@ def main():
     
     # 4. Commit and Tag with Git
     print("\n[INFO] Staging version files and committing...")
-    run_cmd(["git", "add", "package.json", "version.json", "RELEASE_NOTES.md"])
+    files_to_add = ["version.json", "RELEASE_NOTES.md"]
+    if Path("package.json").exists():
+        files_to_add.append("package.json")
+    if Path("development_log.md").exists():
+        files_to_add.append("development_log.md")
+    if Path("dashboard/dev_history.json").exists():
+        files_to_add.append("dashboard/dev_history.json")
+        
+    run_cmd(["git", "add"] + files_to_add)
     commit_msg = f"chore(release): bump version to {new_version} and update changelogs"
     
     res = run_cmd(["git", "commit", "-m", commit_msg])
